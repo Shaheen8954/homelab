@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-grafana
+  namespace: observability
+  labels:
+    app: my-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-grafana
+  template:
+    metadata:
+      labels:
+        app: my-grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:12.3.1
+          ports:
+            - name: http
+              containerPort: 3000
+
+          volumeMounts:
+            - name: grafana-config
+              mountPath: /etc/grafana/grafana.ini
+              subPath: grafana.ini
+
+            - name: grafana-datasource-config
+              mountPath: /etc/grafana/provisioning/datasources
+
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+      volumes:
+        - name: grafana-config
+          configMap:
+            name: grafana-config
+
+        - name: grafana-datasource-config
+          configMap:
+            name: grafana-datasource-config
+
+        - name: grafana-storage
+          persistentVolumeClaim:
+            claimName: grafana-pvc

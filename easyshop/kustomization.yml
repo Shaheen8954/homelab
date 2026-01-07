@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- 00-cloudflare-namespace.yaml
+- 01-namespace.yaml
+- 02-mongodb-pv.yaml
+- 03-mongodb-pvc.yml 
+- 04-configmap.yaml
+- 05-secrets.yaml
+- 06-mongodb-service.yaml
+- 07-mongodb-statefulset.yaml
+- 08-easyshop-deployment.yaml
+- 09-easyshop-service.yaml
+- 10-ingress-cloudflare.yaml
+- 11-hpa.yaml
+- 13-migration-job.yaml
+- 14-cloudflare-secrets.yaml
+- 15-cloudflared-config-template.yaml
+- 16-cloudflared-deploy.yaml
+- 17-grafana-configmap.yaml
+- 18-grafana-deployment.yaml
+- 19-grafana-service.yaml
+- 20-grafana-ingress.yaml
+
