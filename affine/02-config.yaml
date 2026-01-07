@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: affine-config
+  namespace: affine-selfhosted
+type: Opaque
+stringData:
+  # Postgres
+  DB_USERNAME: affine
+  DB_PASSWORD: affine_password
+  DB_DATABASE: affine
+  
+  # Redis
+  REDIS_SERVER_PASSWORD: redis_password
+  
+  # Affine Admin (Optional, usually configured via UI or specific envs)
+  # AFFINE_ADMIN_EMAIL: admin@example.com
+  # AFFINE_ADMIN_PASSWORD: admin_password

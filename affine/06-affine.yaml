@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  namespace: affine-selfhosted
+spec:
+  selector:
+    matchLabels:
+      app: affine
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: affine
+    spec:
+      initContainers:
+      - name: migration
+        image: ghcr.io/toeverything/affine:stable
+        command: ['sh', '-c', 'node ./scripts/self-host-predeploy.js']
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_PASSWORD
+        - name: DB_HOST
+          value: postgres
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_DATABASE
+        - name: DATABASE_URL
+          value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_DATABASE)"
+        - name: REDIS_SERVER_HOST
+          value: redis
+        - name: REDIS_SERVER_PORT
+          value: "6379"
+        - name: REDIS_SERVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: REDIS_SERVER_PASSWORD
+        volumeMounts:
+        - name: affine-storage
+          mountPath: /root/.affine/storage
+          subPath: storage
+        - name: affine-storage
+          mountPath: /root/.affine/config
+          subPath: config
+      containers:
+      - name: affine
+        image: ghcr.io/toeverything/affine:stable
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_PASSWORD
+        - name: DB_HOST
+          value: postgres
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: DB_DATABASE
+        - name: DATABASE_URL
+          value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_DATABASE)"
+        - name: REDIS_SERVER_HOST
+          value: redis
+        - name: REDIS_SERVER_PORT
+          value: "6379"
+        - name: REDIS_SERVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: affine-config
+              key: REDIS_SERVER_PASSWORD
+        - name: AFFINE_SERVER_HOST
+          value: "0.0.0.0" # Bind to all interfaces in container
+        - name: AFFINE_SERVER_PORT
+          value: "3010"
+        ports:
+        - containerPort: 3010
+        volumeMounts:
+        - name: affine-storage
+          mountPath: /root/.affine/storage # Adjust based on actual data path if different
+          subPath: storage
+        - name: affine-storage
+          mountPath: /root/.affine/config
+          subPath: config
+      volumes:
+      - name: affine-storage
+        persistentVolumeClaim:
+          claimName: affine-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine
+  namespace: affine-selfhosted
+spec:
+  selector:
+    app: affine
+  ports:
+  - port: 3010
+    targetPort: 3010
+    protocol: TCP
+  type: ClusterIP 
