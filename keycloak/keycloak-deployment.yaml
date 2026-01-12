@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:22.0.1
+          ports:
+            - containerPort: 8080
+          args:
+            - start
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+            # - name: KEYCLOAK_IMPORT
+            #   value: /opt/jboss/keycloak/standalone/configuration/keycloak.json
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_HOSTNAME
+              value: "keycloak.shaheen.homes"
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            # ✅ Enable health endpoints
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            # ✅ Database Configuration (Connect to Postgres)
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://postgres.keycloak.svc.cluster.local:5432/keycloak"
+            - name: KC_DB_USERNAME
+              value: "keycloak"
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secret
+                  key: POSTGRES_PASSWORD
+
+          # ✅ Startup Probe (gives time for Keycloak to fully start)
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30   # 30x10=300 seconds (5 minutes)
+
+          # ✅ Readiness Probe (pod gets traffic only after ready)
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # ✅ Liveness Probe (restart pod if Keycloak is stuck)
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      
+       
+
