@@ -7,3 +7,10 @@ data:
   MONGODB_URI: "mongodb://mongodb-service:27017/easyshop"
   NEXTURL: "https://easyshop-hack.shaheen.homes"
   NEXTAUTH_URL: "https://easyshop-hack.shaheen.homes"
+
+  # -------------------------------
+  # Keycloak OIDC Configuration
+  # -------------------------------
+  KEYCLOAK_CLIENT_ID: "easyshop"
+  KEYCLOAK_ISSUER_URL: "https://keycloak.shaheen.homes/realms/homelab"
+  KEYCLOAK_CALLBACK_URL: "https://easyshop-hack.shaheen.homes/callback"

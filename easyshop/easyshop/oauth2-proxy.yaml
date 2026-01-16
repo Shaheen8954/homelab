@@ -1,0 +1,104 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: easyshop-hack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4180
+              name: http
+
+          env:
+            - name: OAUTH2_PROXY_PROVIDER
+              value: "keycloak-oidc"
+
+            - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+              value: "https://keycloak.shaheen.homes/realms/homelab"
+
+            - name: OAUTH2_PROXY_CLIENT_ID
+              value: "easyshop-proxy"
+
+            # ✅ fix Keycloak audience issue
+            - name: OAUTH2_PROXY_OIDC_EXTRA_AUDIENCES
+              value: "account"
+
+            - name: OAUTH2_PROXY_REDIRECT_URL
+              value: "https://easyshop-hack.shaheen.homes/oauth2/callback"
+
+            - name: OAUTH2_PROXY_UPSTREAMS
+              value: "http://easyshop-service.easyshop-hack.svc.cluster.local:80"
+
+            - name: OAUTH2_PROXY_EMAIL_DOMAINS
+              value: "*"
+
+            - name: OAUTH2_PROXY_HTTP_ADDRESS
+              value: "0.0.0.0:4180"
+
+            - name: OAUTH2_PROXY_COOKIE_SECURE
+              value: "true"
+
+            - name: OAUTH2_PROXY_COOKIE_SAMESITE
+              value: "lax"
+
+            - name: OAUTH2_PROXY_SCOPE
+              value: "openid profile email"
+
+            - name: OAUTH2_PROXY_SET_XAUTHREQUEST
+              value: "true"
+
+            - name: OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER
+              value: "true"
+
+            - name: OAUTH2_PROXY_PASS_ACCESS_TOKEN
+              value: "true"
+
+            # ✅ you can keep this
+            - name: OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL
+              value: "true"
+
+            # ✅ correct claim usage
+            - name: OAUTH2_PROXY_USER_ID_CLAIM
+              value: "preferred_username"
+
+            - name: OAUTH2_PROXY_EMAIL_CLAIM
+              value: "preferred_username"
+
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secret
+                  key: OAUTH2_PROXY_CLIENT_SECRET
+
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secret
+                  key: OAUTH2_PROXY_COOKIE_SECRET
+
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 10
+            periodSeconds: 20

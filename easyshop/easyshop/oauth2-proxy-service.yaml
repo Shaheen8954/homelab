@@ -1,0 +1,15 @@
+# oauth2-proxy Service
+# ------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy-service
+  namespace: easyshop-hack
+spec:
+  selector:
+    app: oauth2-proxy
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4180
+  type: ClusterIP
