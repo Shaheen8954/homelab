@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: "2026-04-16T08:47:22Z"
+  labels:
+    kubernetes.io/metadata.name: guestbool
+  name: guestbool
+  resourceVersion: "3665976"
+  uid: 5f9dc091-c476-4ce9-ac9b-2dd3b181ebbe
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active

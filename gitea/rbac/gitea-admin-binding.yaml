@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitea-admin-binding
+  namespace: gitea
+subjects:
+- kind: ServiceAccount
+  name: gitea-admin-sa
+  namespace: gitea
+roleRef:
+  kind: Role
+  name: gitea-admin-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,13 @@
+# Patterns to ignore when building Helm packages
+.git
+.gitignore
+README.md
+values-dev.yaml
+values-prod.yaml
+*.tgz
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

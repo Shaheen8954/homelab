@@ -1,0 +1,32 @@
+apiVersion: v1
+items:
+- apiVersion: policy/v1
+  kind: PodDisruptionBudget
+  metadata:
+    creationTimestamp: "2026-04-16T07:35:51Z"
+    generation: 1
+    name: my-app-pdb
+    namespace: cka-lab
+    resourceVersion: "3655138"
+    uid: 40aff393-f934-413a-a19a-4aaf2b9bafed
+  spec:
+    minAvailable: 2
+    selector:
+      matchLabels:
+        app: my-app
+  status:
+    conditions:
+    - lastTransitionTime: "2026-04-16T07:35:51Z"
+      message: ""
+      observedGeneration: 1
+      reason: SufficientPods
+      status: "True"
+      type: DisruptionAllowed
+    currentHealthy: 3
+    desiredHealthy: 2
+    disruptionsAllowed: 1
+    expectedPods: 3
+    observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""

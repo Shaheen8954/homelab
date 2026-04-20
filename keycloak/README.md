@@ -210,9 +210,6 @@ and open gitea gitea<domain name> in new tab or in incognito mode and try to log
 
 ---
 
-## Reference
-
-- Troubleshooting: [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md)
 
 # Troubleshooting: Keycloak + Gitea (OIDC)
 

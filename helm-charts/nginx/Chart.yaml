@@ -1,0 +1,16 @@
+apiVersion: v2
+name: nginx
+description: A Helm chart for Nginx Hello World application
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - nginx
+  - web
+  - hello-world
+home: https://github.com/nginx/nginx
+sources:
+  - https://github.com/nginx/nginx
+maintainers:
+  - name: homelab
+    email: homelab@shaheen.homes
